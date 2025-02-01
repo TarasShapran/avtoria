@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.auth.serializers import EmailSerializer, PasswordSerializer
+from apps.users.choices import UserRoleChoice
 from apps.users.serializers import UserSerializer
 
 UserModel: User = get_user_model()
@@ -25,6 +26,7 @@ class ActivateUserView(GenericAPIView):
         token = kwargs['token']
         user = JWTService.verify_token(token, ActivateToken)
         user.is_active = True
+        user.role = UserRoleChoice.seller.value
         user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)

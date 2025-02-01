@@ -14,3 +14,9 @@ class CurrencyChoice(models.TextChoices):
     USD = 'USD'
     EUR = 'EUR'
     UAH = 'UAH'
+
+class StatusChoice(models.TextChoices):
+    Pending = 'Pending'
+    Active = 'Active'
+    Inactive = 'Inactive'
+    NeedReview = 'NeedReview'

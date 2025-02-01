@@ -6,11 +6,12 @@ from core.services.s3_service import CarStorage
 
 from django.contrib.auth import get_user_model
 from django.core import validators as V
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.auto_parks.models import AutoParkModel
 from apps.car_dealership.models import DealershipModel
-from apps.cars.choices import BodyTypeChoice, CurrencyChoice
+from apps.cars.choices import BodyTypeChoice, CurrencyChoice, StatusChoice
 from apps.cars.managers import CarManager
 from apps.cars.regex import CarRegex
 
@@ -25,10 +26,12 @@ class CarModel(BaseModel):
     model = models.CharField(max_length=50, validators=[V.RegexValidator(*CarRegex.MODEL.value)])
     body_type = models.CharField(max_length=9, choices=BodyTypeChoice.choices)
     price = models.IntegerField(validators=[V.MinValueValidator(1), V.MaxValueValidator(100_000_000)])
+    description = models.CharField(max_length=500)
     currency = models.CharField(max_length=3, choices=CurrencyChoice.choices, default=CurrencyChoice.UAH)
     year = models.IntegerField(validators=[V.MinValueValidator(1990), V.MaxValueValidator(datetime.now().year)])
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='cars',null=True)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='cars', null=True)
     dealership = models.ForeignKey(DealershipModel, on_delete=models.CASCADE, related_name='cars', null=True)
+    status = models.CharField(max_length=15, choices=StatusChoice.choices, default=StatusChoice.Pending)
 
     objects = CarManager()
 
