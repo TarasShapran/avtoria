@@ -9,7 +9,7 @@ from django.core import validators as V
 from django.db import models
 
 from apps.auto_parks.models import AutoParkModel
-from apps.car_dealership.models import CarDealership
+from apps.car_dealership.models import DealershipModel
 from apps.cars.choices import BodyTypeChoice, CurrencyChoice
 from apps.cars.managers import CarManager
 from apps.cars.regex import CarRegex
@@ -28,7 +28,7 @@ class CarModel(BaseModel):
     currency = models.CharField(max_length=3, choices=CurrencyChoice.choices, default=CurrencyChoice.UAH)
     year = models.IntegerField(validators=[V.MinValueValidator(1990), V.MaxValueValidator(datetime.now().year)])
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='cars',null=True)
-    dealership = models.ForeignKey(CarDealership, on_delete=models.CASCADE, related_name='cars', null=True)
+    dealership = models.ForeignKey(DealershipModel, on_delete=models.CASCADE, related_name='cars', null=True)
 
     objects = CarManager()
 
