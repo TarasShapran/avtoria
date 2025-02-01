@@ -8,3 +8,9 @@ class BodyTypeChoice(models.TextChoices):
     Coupe = 'Coupe'
     Jeep = 'Jeep'
     Wagon = 'Wagon'
+
+
+class CurrencyChoice(models.TextChoices):
+    USD = 'USD'
+    EUR = 'EUR'
+    UAH = 'UAH'

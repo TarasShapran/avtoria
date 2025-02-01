@@ -8,6 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core import validators as V
 from django.db import models
 
+from apps.users.choices import UserRoleChoice
 from apps.users.managers import UserManager
 
 
@@ -41,7 +42,9 @@ class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
     ])
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_premium = models.BooleanField(default=False)
     profile = models.OneToOneField(ProfileModel, on_delete=models.CASCADE, related_name='user', null=True)
+    role = models.CharField(max_length=15, choices=UserRoleChoice.choices, default=UserRoleChoice.buyer)
 
     USERNAME_FIELD = 'email'
     objects = UserManager()
