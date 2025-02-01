@@ -8,9 +8,9 @@ from apps.car_dealership.choices import DealershipRoleChoice
 User = get_user_model()
 
 
-class CarDealership(BaseModel):
+class DealershipModel(BaseModel):
     class Meta:
-        db_table = 'car_dealership'
+        db_table = 'dealerships'
     name = models.CharField(max_length=255, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="my_dealerships")
 
@@ -18,13 +18,13 @@ class CarDealership(BaseModel):
         return self.name
 
 
-class DealershipUser(BaseModel):
+class DealershipUserModel(BaseModel):
     class Meta:
-        db_table = 'car_dealership_user'
+        db_table = 'dealership_users'
         unique_together = ('user', 'dealership', 'role')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="dealership_roles")
-    dealership = models.ForeignKey(CarDealership, on_delete=models.CASCADE, related_name="dealership_users")
+    dealership = models.ForeignKey(DealershipModel, on_delete=models.CASCADE, related_name="dealership_users")
     role = models.CharField(max_length=20, choices=DealershipRoleChoice.choices)
 
     def __str__(self):

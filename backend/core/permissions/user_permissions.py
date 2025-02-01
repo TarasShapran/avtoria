@@ -3,7 +3,7 @@ import logging
 from rest_framework.permissions import BasePermission, IsAdminUser
 
 from apps.car_dealership.choices import DealershipRoleChoice
-from apps.car_dealership.models import CarDealership, DealershipUser
+from apps.car_dealership.models import DealershipModel, DealershipUserModel
 
 logger = logging.getLogger()
 
@@ -23,18 +23,18 @@ class IsOwnerPermissionOrReadOnly(BasePermission):
 
 class IsDealershipOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if isinstance(obj, DealershipUser):
+        if isinstance(obj, DealershipUserModel):
             return obj.dealership.owner == request.user
-        elif isinstance(obj, CarDealership):
+        elif isinstance(obj, DealershipModel):
             return obj.owner == request.user
 
 class IsDealershipOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
             return True
-        if isinstance(obj, DealershipUser):
+        if isinstance(obj, DealershipUserModel):
             return obj.dealership.owner == request.user
-        elif isinstance(obj, CarDealership):
+        elif isinstance(obj, DealershipModel):
             return obj.owner == request.user
 
 
@@ -43,10 +43,24 @@ class IsDealershipAdminOrOwner(BasePermission):
         if obj.dealership.owner == request.user:
             return True
 
-        if DealershipUser.objects.filter(
+        if DealershipUserModel.objects.filter(
                 user=request.user,
                 dealership=obj.dealership,
                 role=DealershipRoleChoice.Admin
+        ).exists():
+            return True
+
+        return False
+
+class IsDealershipAdminManagerOrOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.owner == request.user:
+            return True
+
+        if DealershipUserModel.objects.filter(
+                user=request.user,
+                dealership=obj,
+                role__in= (DealershipRoleChoice.Admin,DealershipRoleChoice.Manager)
         ).exists():
             return True
 
