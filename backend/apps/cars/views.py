@@ -1,3 +1,4 @@
+from core.permissions.user_permissions import IsOwnerPermissionOrReadOnly
 from drf_yasg.utils import swagger_auto_schema
 
 from django.utils.decorators import method_decorator
@@ -18,26 +19,23 @@ from apps.cars.models import CarModel
 from apps.cars.serializers import CarPhotoSerializer, CarSerializer
 
 
-@method_decorator(name='get', decorator=swagger_auto_schema(security=[]))
-class CarsListView(ListCreateAPIView):
+class CarsListCreateView(ListCreateAPIView):
     """
-        show all cars
+    get:
+        Get cars
+    post:
+        create car
     """
     serializer_class = CarSerializer
     queryset = CarModel.objects.all()
-    # pagination_class = None
     filterset_class = CarFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(auto_park_id=1)
+        serializer.save(user=self.request.user)
         super().perform_create(serializer)
 
 
-# @method_decorator(name='get', decorator=swagger_auto_schema(security=[]))
-# @method_decorator(name='put', decorator=swagger_auto_schema(security=[]))
-# @method_decorator(name='patch', decorator=swagger_auto_schema(security=[]))
-# @method_decorator(name='delete', decorator=swagger_auto_schema(security=[]))
 class CarRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
     get:
@@ -49,30 +47,29 @@ class CarRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     delete:
         Delete car by id
     """
-
     queryset = CarModel.objects.all()
     serializer_class = CarSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsOwnerPermissionOrReadOnly,)
 
 
-class CarAddPhotosView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    # serializer_class = CarPhotoSerializer
-    queryset = CarModel.objects.all()
+# class CarAddPhotosView(GenericAPIView):
+#     permission_classes = (IsOwnerPermissionOrReadOnly,)
+#     queryset = CarModel.objects.all()
+#
+#     def put(self, *args, **kwargs):
+#         files = self.request.FILES
+#         car = self.get_object()
+#         for index in files:
+#             serializer = CarPhotoSerializer(data={'photo': files[index]})
+#             serializer.is_valid(raise_exception=True)
+#             serializer.save(car=car)
+#         car_serializer = CarSerializer(car)
+#         return Response(car_serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, *args, **kwargs):
-        files = self.request.FILES
-        car = self.get_object()
-        for index in files:
-            serializer = CarPhotoSerializer(data={'photo': files[index]})
-            serializer.is_valid(raise_exception=True)
-            serializer.save(car=car)
-        car_serializer = CarSerializer(car)
-        return Response(car_serializer.data, status=status.HTTP_200_OK)
 
 class AddPhotoByCarIdView(GenericAPIView):
-    queryset = CarModel.objects.all()
-    permission_classes = (IsAuthenticated,)
+    queryset = CarModel.objects.prefetch_related('car_images').all()
+    permission_classes = (IsOwnerPermissionOrReadOnly,)
 
     def post(self, request, *args, **kwargs):
         car = self.get_object()

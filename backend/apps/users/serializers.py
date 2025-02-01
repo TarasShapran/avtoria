@@ -20,6 +20,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'surname', 'birth_day', 'phone_number', 'get_age', 'created_at', 'updated_at')
 
 
+class ShortUsersInfo(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = (
+            'id',
+            'email'
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     password = serializers.CharField(max_length=100, min_length=8, write_only=True, validators=[
@@ -32,6 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'password',
+            'role',
             'is_active',
             'is_staff',
             'is_superuser',
@@ -41,7 +51,8 @@ class UserSerializer(serializers.ModelSerializer):
             'profile'
         )
 
-        read_only_fields = ('id', 'is_active', 'is_staff', 'is_superuser', 'last_login', 'created_at', 'updated_at')
+        read_only_fields = (
+            'id', 'is_active', 'is_staff', 'role', 'is_superuser', 'last_login', 'created_at', 'updated_at')
         extra_kwargs = {
             'password': {
                 'write_only': True,

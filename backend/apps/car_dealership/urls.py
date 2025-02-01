@@ -1,10 +1,15 @@
 from django.urls import path
 
-from .views import AddPhotoByCarIdView, CarAddPhotosView, CarRetrieveUpdateDestroyView, CarsListCreateView
+from .views import (
+    AddRoleToDealershipView,
+    DealershipListCreateView,
+    DealershipRetrieveUpdateDestroyView,
+    RetrieveUpdateDestroyRoleToDealershipView,
+)
 
 urlpatterns = [
-    path('', CarsListCreateView.as_view(), name='cars_create_list'),
-    path('/<int:pk>', CarRetrieveUpdateDestroyView.as_view(), name='cars_retrieve_update_destroy'),
-    # path('/<int:pk>/photos', CarAddPhotosView.as_view(), name='cars_add_photos'),
-    path('/<int:pk>/photo', AddPhotoByCarIdView.as_view(), name='cars_add_photo'),
+    path('', DealershipListCreateView.as_view(), name='dealership_create_list'),
+    path('/<int:pk>', DealershipRetrieveUpdateDestroyView.as_view(), name='dealership_create_list'),
+    path('/<int:pk>/managmentPersonal', RetrieveUpdateDestroyRoleToDealershipView.as_view(), name='dealership_create_list'),
+    path('/<int:pk>/addAdmin', AddRoleToDealershipView.as_view(), name='add_admin_to_dealership'),
 ]
