@@ -1,6 +1,7 @@
 from core.permissions.user_permissions import IsOwnerPermissionOrReadOnly
 from drf_yasg.utils import swagger_auto_schema
 
+from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
 
 from rest_framework import serializers, status
@@ -32,6 +33,12 @@ class CarsListCreateView(ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_premium:
+            car_count = CarModel.objects.filter(user=user).count()
+            if car_count >= 1:
+                raise PermissionDenied("Tou need buy premium to add more than one car")
+
         serializer.save(user=self.request.user)
         super().perform_create(serializer)
 
@@ -76,6 +83,7 @@ class AddPhotoByCarIdView(GenericAPIView):
         images = request.data.getlist('image', None)
         if not images:
             raise serializers.ValidationError('image: this field is required')
+
         for image in images:
             data = {'image': image}
             photo_serializer = CarPhotoSerializer(data=data)
