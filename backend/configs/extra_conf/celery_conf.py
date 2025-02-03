@@ -5,3 +5,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_IMPORTS = [
+    'core.services.currency_exchange_service',
+    'core.services.email_service',
+]

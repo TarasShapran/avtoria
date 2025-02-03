@@ -21,14 +21,10 @@ class EmailService:
         msg.send()
 
     @classmethod
-    def send_test(cls):
-        cls.__send_email('demchyshyn.v87@gmail.com', 'test.html', {}, 'Test Email')
-
-    @classmethod
     def register(cls, user: User):
         token = JWTService.create_token(user, ActivateToken)
         url = f'http://localhost:3000/activate/{token}'
-        cls.__send_email(
+        cls.__send_email.delay(
             user.email,
             'register.html',
             {'name': user.profile.name, 'url': url},
@@ -48,9 +44,4 @@ class EmailService:
             },
             'Recovery Password'
         )
-
-    @staticmethod
-    @app.task
-    def spam():
-        for user in UserModel.objects.all():
-            EmailService.__send_email(user.email, 'spam.html', {}, 'Spam')
+        
