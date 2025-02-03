@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.cars',
     'apps.car_dealership',
+    'apps.price_convertor',
 ]
 
 MIDDLEWARE = [

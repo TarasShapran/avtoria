@@ -49,3 +49,13 @@ class CarImagesModel(BaseModel):
             self.image.storage.user_or_dealer = ''.join(str(self.car.user).split('@')[0])
         self.image.storage.car_model = self.car.model
         super(CarImagesModel, self).save(*args, **kwargs)
+
+class CarCurrencyPriceModel(BaseModel):
+    class Meta:
+        db_table = 'car_currency_price'
+
+    currency = models.CharField(max_length=3, choices=CurrencyChoice.choices)  # USD, EUR, UAH
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    car = models.ForeignKey(CarModel, on_delete=models.CASCADE, related_name='car_currency_prices')
