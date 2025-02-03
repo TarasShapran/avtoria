@@ -116,6 +116,14 @@ class DealershipRetrieveUpdateDeleteCarView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsDealershipAdminManagerOrOwner,)
 
     def get_object(self):
+        return super().get_object()
+
+    def get_object(self):
         dealership_id = self.kwargs["dealership_id"]
         car_id = self.kwargs["car_id"]
-        return get_object_or_404(CarModel, id=car_id, dealership_id=dealership_id)
+
+        obj = get_object_or_404(CarModel, id=car_id, dealership_id=dealership_id)
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
