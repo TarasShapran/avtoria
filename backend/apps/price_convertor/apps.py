@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AutoParksConfig(AppConfig):
+class PriceConvertorConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.auto_parks'
+    name = 'apps.price_convertor'

@@ -4,32 +4,12 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
-from apps.auto_parks.models import AutoParkModel
 from apps.cars.models import CarModel
 
 UserModel = get_user_model()
 
 class CarApiTestCase(APITestCase):
-    def setUp(self):
-        self.auto_park_id = AutoParkModel.objects.create(
-            name='Uber'
-        ).id
 
-        self.car1 = CarModel.objects.create(
-            model="BMW",
-            body_type="Jeep",
-            price=2000,
-            year=2000,
-            auto_park_id=self.auto_park_id
-        )
-
-        self.car2 = CarModel.objects.create(
-            model="AUDI",
-            body_type="Sedan",
-            price=3000,
-            year=2001,
-            auto_park_id=self.auto_park_id
-        )
 
     def _authenticate(self):
         user = UserModel.objects.create_user(email='admin@gmail.com', password='P@$$word1', is_active=True)

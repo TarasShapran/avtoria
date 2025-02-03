@@ -9,7 +9,6 @@ from django.core import validators as V
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.auto_parks.models import AutoParkModel
 from apps.car_dealership.models import DealershipModel
 from apps.cars.choices import BodyTypeChoice, CurrencyChoice, StatusChoice
 from apps.cars.managers import CarManager
