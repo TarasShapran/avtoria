@@ -4,7 +4,7 @@ from enum import Enum
 class CarRegex(Enum):
     BRAND = (
         r'^[A-Z][a-zA-Z]{1,49}$',
-        "Model must consist for first letter uppercase and only letters.",
+        "Brand must consist for first letter uppercase and only letters.",
     )
     MODEL = (
         r'^[A-Z][a-zA-Z0-9 ]{0,49}$',

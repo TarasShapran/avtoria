@@ -24,6 +24,7 @@ django-storages = "^1.14.4"
 boto3 = "^1.35.90"
 django-phonenumber-field = {extras = ["phonenumbers"], version = "^8.0.0"}
 requests = "^2.32.3"
+better-profanity = "^0.7.0"
 
 
 [tool.poetry.group.dev.dependencies]
