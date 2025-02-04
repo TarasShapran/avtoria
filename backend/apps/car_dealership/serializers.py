@@ -34,10 +34,11 @@ class DealershipUserSerializer(serializers.ModelSerializer):
 
 class DealershipSerializer(serializers.ModelSerializer):
     dealership_users = DealershipUserSerializer(many=True, read_only=True)
+    cars = CarSerializer(many=True, read_only=True)
 
     class Meta:
         model = DealershipModel
-        fields = ('id', 'name', 'owner', 'dealership_users', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'owner', 'dealership_users', 'cars', 'created_at', 'updated_at')
         read_only_fields = ('owner', 'id')
 
 

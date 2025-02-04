@@ -4,10 +4,11 @@ from configs.celery import app
 from core.dataclasses.user_dataclass import User
 from core.services.jwt_service import ActionToken, ActivateToken, JWTService, RecoverToken
 
+from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
-from apps.users.models import UserModel
+UserModel: User = get_user_model()
 
 
 class EmailService:
@@ -29,6 +30,16 @@ class EmailService:
             'register.html',
             {'name': user.profile.name, 'url': url},
             'Register Email'
+        )
+
+    @classmethod
+    def validate_advertisement(cls, car):
+        user = UserModel.objects.filter(is_staff=1).first()
+        cls.__send_email.delay(
+            user.email,
+            'validate_advertisement.html',
+            {'car_owner':car.user.email, 'car': car.id},
+            'Validate advertisement Email'
         )
 
     @classmethod
