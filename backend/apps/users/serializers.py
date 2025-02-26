@@ -20,12 +20,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'surname', 'birth_day', 'phone_number', 'get_age', 'created_at', 'updated_at')
 
 
-class ShortUsersInfo(serializers.ModelSerializer):
+class UserShortInfoSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
+
     class Meta:
         model = UserModel
         fields = (
             'id',
-            'email'
+            'email',
+            'profile',
         )
 
 

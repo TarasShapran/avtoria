@@ -15,11 +15,14 @@ class IsSuperUser(BasePermission):
 
 
 class IsOwnerPermissionOrReadOnly(BasePermission):
-
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
             return True
         return obj.user == request.user
+
+class IsPremiumUser(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user and request.user.is_premium
 
 
 class IsDealershipOwner(BasePermission):

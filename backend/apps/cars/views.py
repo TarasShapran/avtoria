@@ -1,20 +1,22 @@
 import logging
+from datetime import timedelta
 
-from core.exceptions.validation_exception import ProfanityValidationError
-from core.permissions.user_permissions import IsOwnerPermissionOrReadOnly
+from core.permissions.user_permissions import IsOwnerPermissionOrReadOnly, IsPremiumUser
 from core.services.email_service import EmailService
 
 from django.core.exceptions import PermissionDenied
+from django.db.models.aggregates import Avg
+from django.utils.timezone import now
 
 from rest_framework import serializers, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from apps.cars.choices import StatusChoice
+from apps.cars.choices import CurrencyChoice, StatusChoice
 from apps.cars.filters import CarFilter
 from apps.cars.models import CarModel
-from apps.cars.serializers import CarPhotoSerializer, CarSerializer
+from apps.cars.serializers import CarPhotoSerializer, CarSerializer, CarViewSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +77,19 @@ class CarRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = CarModel.objects.exclude(status=StatusChoice.Inactive.value).all()
     serializer_class = CarSerializer
     permission_classes = (IsOwnerPermissionOrReadOnly,)
+    filterset_class = CarFilter
+
+    def get(self, request, *args, **kwargs):
+        car = self.get_object()
+        if (car.user and request.user != car.user) or (car.dealership and car.dealership != request.user):
+            data = {
+                'car': car.id,
+                'user': request.user.id if request.user else None
+            }
+            serializer = CarViewSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return super().get(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
 
@@ -114,21 +129,6 @@ class CarRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 
         return super().update(request, *args, **kwargs)
 
-    # def perform_update(self, serializer):
-    #     car = self.get_object()
-    #     edit_attempts = car.edit_attempts
-    #     if car.status == StatusChoice.Pending.value and edit_attempts <= 3:
-    #         edit_attempts += 1
-    #         serializer.save(edit_attempts=edit_attempts)
-    #     elif edit_attempts >= 3:
-    #         car.status = StatusChoice.NeedReview.value
-    #         car.save()
-    #         EmailService.validate_advertisement(car)
-    #         raise PermissionDenied(
-    #             "You have exceeded the maximum number of edit attempts. The listing is now under review.")
-    #
-    #     super().perform_update(serializer)
-
 
 class AddPhotoByCarIdView(GenericAPIView):
     queryset = CarModel.objects.prefetch_related('car_images').all()
@@ -147,3 +147,49 @@ class AddPhotoByCarIdView(GenericAPIView):
             photo_serializer.save(car=car)
         car_serializer = CarSerializer(car)
         return Response(car_serializer.data, status.HTTP_201_CREATED)
+
+
+class CarStatisticView(RetrieveAPIView):
+    queryset = CarModel.objects.prefetch_related('views', 'car_currency_prices').all()
+    permission_classes = (IsPremiumUser,)
+    serializer_class = CarSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        car: CarModel = self.get_object()
+        serializer = self.get_serializer(car)
+
+        today = now().date()
+        week_ago = today - timedelta(days=7)
+        month_ago = today - timedelta(days=30)
+
+        total_views = car.views.count()
+        views_today = car.views.filter(created_at__date=today).count()
+        views_this_week = car.views.filter(created_at__date__gte=week_ago).count()
+        views_this_month = car.views.filter(created_at__date__gte=month_ago).count()
+
+        average_price_in_region = (
+            CarModel.objects
+            .prefetch_related('car_currency_prices')
+            .filter(region=car.region, car_currency_prices__currency=CurrencyChoice.USD.value)
+            .aggregate(average_price=Avg('car_currency_prices__amount'))['average_price']
+        )
+
+        average_price_in_ukraine = (
+            CarModel.objects
+            .prefetch_related('car_currency_prices')
+            .filter(car_currency_prices__currency=CurrencyChoice.USD.value).exclude(status=StatusChoice.Inactive)
+            .aggregate(average_price=Avg('car_currency_prices__amount'))['average_price']
+        )
+
+        data = {
+            "car": serializer.data,
+            "statistics": {
+                "total_views": total_views,
+                "views_today": views_today,
+                "views_this_week": views_this_week,
+                "views_this_month": views_this_month,
+                "average_price_in_region": round(average_price_in_region, 2) if average_price_in_region else None,
+                "average_price_in_ukraine": round(average_price_in_ukraine, 2) if average_price_in_ukraine else None,
+            }
+        }
+        return Response(data, status=status.HTTP_200_OK)
