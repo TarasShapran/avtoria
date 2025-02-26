@@ -10,10 +10,19 @@ class BodyTypeChoice(models.TextChoices):
     Wagon = 'Wagon'
 
 
+class RegionChoice(models.TextChoices):
+    Lviv = 'Lviv'
+    Kyiv = 'Kyiv'
+    Odesa = 'Odesa'
+    Lutsk = 'Lutsk'
+    Rivne = 'Rivne'
+
+
 class CurrencyChoice(models.TextChoices):
     USD = 'USD'
     EUR = 'EUR'
     UAH = 'UAH'
+
 
 class StatusChoice(models.TextChoices):
     Pending = 'Pending'

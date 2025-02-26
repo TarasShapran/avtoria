@@ -6,11 +6,10 @@ from core.services.s3_service import CarStorage
 
 from django.contrib.auth import get_user_model
 from django.core import validators as V
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.car_dealership.models import DealershipModel
-from apps.cars.choices import BodyTypeChoice, CurrencyChoice, StatusChoice
+from apps.cars.choices import BodyTypeChoice, CurrencyChoice, RegionChoice, StatusChoice
 from apps.cars.managers import CarManager
 from apps.cars.regex import CarRegex
 
@@ -24,13 +23,13 @@ class CarModel(BaseModel):
     brand = models.CharField(max_length=50, validators=[V.RegexValidator(*CarRegex.BRAND.value)])
     model = models.CharField(max_length=50, validators=[V.RegexValidator(*CarRegex.MODEL.value)])
     body_type = models.CharField(max_length=9, choices=BodyTypeChoice.choices)
+    region = models.CharField(max_length=30, choices=RegionChoice.choices)
     price = models.IntegerField(validators=[V.MinValueValidator(1), V.MaxValueValidator(100_000_000)])
     description = models.CharField(max_length=500)
     currency = models.CharField(max_length=3, choices=CurrencyChoice.choices, default=CurrencyChoice.UAH)
     year = models.IntegerField(validators=[V.MinValueValidator(1990), V.MaxValueValidator(datetime.now().year)])
     status = models.CharField(max_length=15, choices=StatusChoice.choices, default=StatusChoice.Active)
     edit_attempts = models.IntegerField(default=0)
-
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='cars', null=True)
     dealership = models.ForeignKey(DealershipModel, on_delete=models.CASCADE, related_name='cars', null=True)
 
@@ -61,3 +60,12 @@ class CarCurrencyPriceModel(BaseModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
     car = models.ForeignKey(CarModel, on_delete=models.CASCADE, related_name='car_currency_prices')
+
+class CarViewModel(models.Model):
+    class Meta:
+        db_table = 'car_view'
+
+    car = models.ForeignKey(CarModel, related_name='views', on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+

@@ -10,11 +10,18 @@ from rest_framework import serializers
 from rest_framework.fields import empty
 
 from apps.cars.choices import StatusChoice
-from apps.cars.models import CarCurrencyPriceModel, CarImagesModel, CarModel
+from apps.cars.models import CarCurrencyPriceModel, CarImagesModel, CarModel, CarViewModel
+from apps.users.serializers import UserSerializer, UserShortInfoSerializer
 
 logger = logging.getLogger(__name__)
 
 profanity_checker = CustomProfanity()
+
+
+class CarViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarViewModel
+        fields = ('car', 'user',)
 
 
 class CarCurrencyPriceSerializer(serializers.ModelSerializer):
@@ -36,11 +43,15 @@ class CarPhotoSerializer(serializers.ModelSerializer):
 
 class CarSerializer(serializers.ModelSerializer):
     car_images = CarPhotoSerializer(many=True, read_only=True)
+    user = UserShortInfoSerializer(read_only=True)
+    car_currency_prices = CarCurrencyPriceSerializer(many=True, read_only=True)
 
     class Meta:
         model = CarModel
         fields = (
-            'id', 'model', 'brand', 'currency', 'price', 'description', 'body_type', 'year', 'car_images', 'user',
+            'id', 'model', 'brand', 'currency', 'price', 'region', 'car_currency_prices', 'description', 'body_type',
+            'year',
+            'car_images', 'user',
             'created_at', 'updated_at')
 
     def __init__(self, instance=None, data=empty, **kwargs):

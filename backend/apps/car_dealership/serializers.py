@@ -9,7 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from apps.car_dealership.choices import DealershipRoleChoice
 from apps.car_dealership.models import DealershipModel, DealershipUserModel
 from apps.cars.serializers import CarSerializer
-from apps.users.serializers import ShortUsersInfo, UserSerializer
+from apps.users.serializers import UserSerializer, UserShortInfoSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ UserModel = get_user_model()
 
 
 class DealershipUserSerializer(serializers.ModelSerializer):
-    user = ShortUsersInfo(read_only=True)
+    user = UserShortInfoSerializer(read_only=True)
 
     class Meta:
         model = DealershipUserModel
