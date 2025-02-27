@@ -1,4 +1,5 @@
 import logging
+import time
 from datetime import timedelta
 
 from core.permissions.user_permissions import IsOwnerPermissionOrReadOnly, IsPremiumUser
@@ -6,7 +7,9 @@ from core.services.email_service import EmailService
 
 from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Avg
+from django.utils.decorators import method_decorator
 from django.utils.timezone import now
+from django.views.decorators.cache import cache_page
 
 from rest_framework import serializers, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
@@ -32,6 +35,14 @@ class CarsListCreateView(ListCreateAPIView):
     queryset = CarModel.objects.filter(status=StatusChoice.Active.value).all()
     filterset_class = CarFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        time.sleep(5)
+        return super().get_queryset()
+
+    @method_decorator(cache_page(60 * 60, key_prefix='cars_list'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
 
