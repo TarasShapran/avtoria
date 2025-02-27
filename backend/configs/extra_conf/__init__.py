@@ -1,3 +1,4 @@
+from .cache_config import *
 from .celery_conf import *
 from .channels_conf import *
 from .drf_yasg_conf import *
